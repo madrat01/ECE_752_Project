@@ -20,7 +20,7 @@ print("cpu_type input:"+str(cpu_type))
 print("cf_type input:"+str(cf_type))
 print("mem_type input:"+str(mem_type))
 print("bool_vic input:"+str(bool_vic))
-print("executable path:"+"../../test/"+str(exe_path))
+print("executable path:"+"../../bench_test/"+str(exe_path))
 
 # create a system that we are going to simulate
 system = System()
@@ -120,7 +120,7 @@ thispath = os.path.dirname(os.path.realpath(__file__))
 #binary = os.path.join(thispath, '../../../',
 #                      'hw4_cpp/',)
 
-binary = os.path.join(thispath, '../../test',exe_path)
+binary = os.path.join(thispath, '../../bench_test',exe_path)
 
 # for gem5 V21 and beyond, uncomment the following line
 system.workload = SEWorkload.init_compatible(binary)
