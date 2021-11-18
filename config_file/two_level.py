@@ -64,6 +64,7 @@ else:
 system.cpu.icache = L1ICache()
 system.cpu.dcache = L1DCache()
 
+
 # connect the caches to the CPU ports
 system.cpu.icache.connectCPU(system.cpu)
 system.cpu.dcache.connectCPU(system.cpu)
@@ -73,13 +74,21 @@ system.membus = SystemXBar()
 
 # we need to crate an L2 bus to connect L1 to L2
 system.l2bus = L2XBar()
+system.l3bus = L2XBar()
 
 system.cpu.icache.connectBus(system.l2bus)
 system.cpu.dcache.connectBus(system.l2bus)
 
-system.l2cache = L2Cache()
+system.l2cache = VictimCache()
 system.l2cache.connectCPUSideBus(system.l2bus)
-system.l2cache.connectMemSideBus(system.membus)
+#ystem.l2cache.connectMemSideBus(system.membus)
+
+system.l3cache = L2Cache()
+system.l3cache.connectCPUSideBus(system.l3bus)
+
+# Connect the L2 cache to the membus
+system.l2cache.connectMemSideBus(system.l3bus)
+system.l3cache.connectMemSideBus(system.membus)
 
 # Connecting the PIO and interrupt ports to the memory bus
 system.cpu.createInterruptController()
