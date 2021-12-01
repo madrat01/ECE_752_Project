@@ -65,14 +65,14 @@ system.cpu.dcache.connectCPU(system.cpu)
 
 #L2 bus
 system.l2bus = L2XBar()
-if options.victim=='1' :
+if options.victim == '1' :
     #victim bus
-    system.victimbus = L2XBar()
+    system.victimbus = VictimXBar()
 
 # connect icache to l2 bus
 system.cpu.icache.connectBus(system.l2bus)
 
-if options.victim=='1' :
+if options.victim == '1' :
     # connect dcache to victim bus
     system.cpu.dcache.connectBus(system.victimbus)
     # Create victim cache

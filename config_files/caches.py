@@ -1,6 +1,8 @@
 # Tutorial caches.py
 
 from m5.objects import Cache
+from m5.objects import CoherentXBar
+from m5.objects import SnoopFilter
 
 class L1Cache(Cache):
     assoc = 2
@@ -54,13 +56,14 @@ class L1DCache(L1Cache):
 
 class VictimCache(Cache):
     size = '4kB'
-    assoc = 2
+    assoc = 64
     tag_latency = 0
     data_latency = 0
     response_latency = 0
-    mshrs = 1
-    tgts_per_mshr = 1
+    mshrs = 4
+    tgts_per_mshr = 20
     clusivity = 'mostly_excl'
+    writeback_clean = True
     
     def __init__(self, options=None):
         super(VictimCache, self).__init__()
@@ -100,3 +103,24 @@ class L2Cache(Cache):
 
     def connectMemSideBus(self, bus):
         self.mem_side = bus.cpu_side_ports
+
+class VictimXBar(CoherentXBar) :
+    # 256-bit crossbar by default
+    width = 256
+
+    # Assume that most of this is covered by the cache latencies, with
+    # no more than a single pipeline stage for any packet.
+    frontend_latency = 0
+    forward_latency = 0
+    response_latency = 0
+    snoop_response_latency = 0
+
+    # Use a snoop-filter by default, and set the latency to zero as
+    # the lookup is assumed to overlap with the frontend latency of
+    # the crossbar
+    snoop_filter = SnoopFilter(lookup_latency = 0)
+
+    # This specialisation of the coherent crossbar is to be considered
+    # the point of unification, it connects the dcache and the icache
+    # to the first level of unified cache.
+    point_of_unification = False
