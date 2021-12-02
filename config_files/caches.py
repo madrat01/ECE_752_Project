@@ -55,8 +55,8 @@ class L1DCache(L1Cache):
         self.cpu_side = cpu.dcache_port
 
 class VictimCache(Cache):
-    size = '4kB'
-    assoc = 64
+    size = '1kB'
+    assoc = 16
     tag_latency = 0
     data_latency = 0
     response_latency = 0
