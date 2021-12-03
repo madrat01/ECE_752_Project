@@ -79,8 +79,32 @@ class VictimCache(Cache):
     def connectMemSideBus(self, bus):
         self.mem_side = bus.cpu_side_ports
 
-class L2Cache(Cache):
+class L2VictimCache(Cache):
+    size = '4kB'
+    assoc = 64
+    tag_latency = 0
+    data_latency = 0
+    response_latency = 0
+    mshrs = 20
+    tgts_per_mshr = 12
+    clusivity = 'mostly_excl'
+    writeback_clean = True
     
+    def __init__(self, options=None):
+        super(L2VictimCache, self).__init__()
+        if options and options.l2_victim_size:
+            self.size = options.l2_victim_size
+        if options and options.l2_victim_assoc:
+            self.assoc = options.l2_victim_assoc
+        return
+
+    def connectCPUSideBus(self, bus):
+        self.cpu_side = bus.mem_side_ports
+
+    def connectMemSideBus(self, bus):
+        self.mem_side = bus.cpu_side_ports
+
+class L2Cache(Cache):
     size = '256kB'
     assoc = 8
     tag_latency = 20
@@ -96,6 +120,8 @@ class L2Cache(Cache):
             self.size = options.l2_size
         if options and options.l2_assoc:
             self.assoc = options.l2_assoc
+        if options and options.l2_victim:
+            self.writeback_clean = True
         return
     
     def connectCPUSideBus(self, bus):

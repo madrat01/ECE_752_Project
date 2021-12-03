@@ -9,12 +9,15 @@ parser.add_argument('--num', default='65536', nargs='?', type=str, help='Path to
 parser.add_argument('--l1i_size', help='L1ICache Size, default 16kB')
 parser.add_argument('--l1d_size', help='L1DCache Size, default 64kB')
 parser.add_argument('--l2_size',  help='L2Cache Size, default 256kB')
-parser.add_argument('--victim_size',  help='victim Size, default 1kB')
+parser.add_argument('--victim_size',  help='L1 victim Cache Size, default 256kB')
+parser.add_argument('--l2_victim_size',  help='L2 victim Cache Size, default 256kB')
 parser.add_argument('--l1i_assoc', help='L1ICache Associativity, default 2-way')
 parser.add_argument('--l1d_assoc', help='L1DCache Associativity, default 2-way')
 parser.add_argument('--l2_assoc',  help='L2Cache Associativity, default 8-way')
-parser.add_argument('--victim_assoc',  help='Victim Associativity, This number need to be set as victim_size/64B to ensure fully associative, default 16')
-parser.add_argument('--victim',  default='0', help='Enable Victim Cache')
+parser.add_argument('--victim_assoc',  help='L1 victim cache Size, default 256kB')
+parser.add_argument('--l2_victim_assoc',  help='L2Cache victim cache Size, default 256kB')
+parser.add_argument('--victim',  default='0', help='Enable L1 Victim Cache')
+parser.add_argument('--l2_victim',  default='0', help='Enable L2 Victim Cache')
 parser.add_argument('--cpu_type', help='CPU Type, default is TimingSimpleCPU')
 parser.add_argument('--clk_freq', help='Clock frequencey, default is 1GHz')
 parser.add_argument('--mem_type', help='Memory DRAM type, default is DDR3_1600_8x8')
@@ -68,6 +71,9 @@ system.l2bus = L2XBar()
 if options.victim == '1' :
     #victim bus
     system.victimbus = VictimXBar()
+if options.l2_victim == '1' :
+    #victim bus
+    system.l2_victimbus = VictimXBar()
 
 # connect icache to l2 bus
 system.cpu.icache.connectBus(system.l2bus)
@@ -91,8 +97,17 @@ system.l2cache = L2Cache(options)
 # connect l2 bus to l2 cache
 system.l2cache.connectCPUSideBus(system.l2bus)
 
-# connect l2cache to memory
-system.l2cache.connectMemSideBus(system.membus)
+if options.l2_victim == '1' :
+    system.l2cache.connectMemSideBus(system.l2_victimbus)
+    # Create victim cache
+    system.l2_victimcache = L2VictimCache(options)
+    # connect victim bus to victim cache
+    system.l2_victimcache.connectCPUSideBus(system.l2_victimbus)
+    # connect victim to l2 bus
+    system.l2_victimcache.connectMemSideBus(system.membus)
+else :
+    # connect l2cache to memory
+    system.l2cache.connectMemSideBus(system.membus)
 
 # Interrupt controller - why is this needed? 
 system.cpu.createInterruptController()
