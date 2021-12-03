@@ -5,7 +5,6 @@ from caches import *
 
 parser = argparse.ArgumentParser(description='2-level cache')
 parser.add_argument('--binary', default='', nargs='?', type=str, help='Path to the binary to execute')
-parser.add_argument('--num', default='65536', nargs='?', type=str, help='Path to the binary to execute')
 parser.add_argument('--l1i_size', help='L1ICache Size, default 16kB')
 parser.add_argument('--l1d_size', help='L1DCache Size, default 64kB')
 parser.add_argument('--l2_size',  help='L2Cache Size, default 256kB')
@@ -21,6 +20,13 @@ parser.add_argument('--l2_victim',  default='0', help='Enable L2 Victim Cache')
 parser.add_argument('--cpu_type', help='CPU Type, default is TimingSimpleCPU')
 parser.add_argument('--clk_freq', help='Clock frequencey, default is 1GHz')
 parser.add_argument('--mem_type', help='Memory DRAM type, default is DDR3_1600_8x8')
+
+parser.add_argument('--num', default='45000', nargs='?', type=str, help='')
+parser.add_argument('--benchmark', default='', nargs='?', type=str,  help='')
+parser.add_argument('--fixed', help='')
+parser.add_argument('--mean', help='')
+parser.add_argument('--sd', help='')
+parser.add_argument('--seed', help='')
 
 options = parser.parse_args()
 
@@ -136,11 +142,20 @@ system.mem_ctrl.port =  system.membus.mem_side_ports
 # Pass the binary
 binary = options.binary
 num = options.num
+fixed = options.fixed
+mean = options.mean
+sd = options.sd
+seed = options.seed
+benchmark = options.benchmark
 
 system.workload = SEWorkload.init_compatible(binary)
 
 process = Process()
-process.cmd = [binary]+[num]
+if not benchmark :
+    process.cmd = [binary]
+else :
+    process.cmd = [binary, '--fixed', fixed, '--mean', mean, '--num', num, '--sd', sd, '--seed', seed, benchmark]
+
 system.cpu.workload = process
 system.cpu.createThreads()
 
